@@ -44,14 +44,19 @@
 #endif
 
 #ifndef PORT
-# define PORT 35
+# define PORT 10000
 #endif
+
+
+# define SEND 0
+# define RECEIVE 0
+
 
 static void usage(const char *error)
 {
 	if (error)
 		printf("invalid option: %s\n", error);
-	printf("timestamping interface option*\n\n"
+		printf("<interface name> <send | recieve> <timestamping interface option*>\n\n"
 	       "Options:\n"
 	       "  IP_MULTICAST_LOOP - looping outgoing multicasts\n"
 	       "  SO_TIMESTAMP - normal software time stamping, ms resolution\n"
@@ -301,6 +306,7 @@ int main(int argc, char **argv)
 	int so_timestamping_flags = 0;
 	int so_timestamp = 0;
 	int so_timestampns = 0;
+	int op = -1;
 	int siocgstamp = 0;
 	int siocgstampns = 0;
 	int ip_multicast_loop = 0;
@@ -318,11 +324,18 @@ int main(int argc, char **argv)
 	socklen_t len;
 	struct timeval next;
 
-	if (argc < 2)
+	if (argc < 3)
 		usage(0);
 	interface = argv[1];
+	if (!strcasecmp(argv[2], "send"))
+		op = 1;
+	else if (!strcasecmp(argv[2], "receive"))
+		op = 2;
 
-	for (i = 2; i < argc; i++) {
+	if (!(op > 2 || op < 0 ))
+		usage(0);
+
+	for (i = 3; i < argc; i++) {
 		if (!strcasecmp(argv[i], "SO_TIMESTAMP"))
 			so_timestamp = 1;
 		else if (!strcasecmp(argv[i], "SO_TIMESTAMPNS"))
@@ -382,9 +395,10 @@ int main(int argc, char **argv)
 	       hwconfig_requested.rx_filter, hwconfig.rx_filter);
 
 	/* bind to PORT */
+	addr.sin_addr = ((struct sockaddr_in *)&device.ifr_addr)->sin_addr;
 	addr.sin_family = AF_INET;
 	//addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	addr.sin_addr.s_addr = inet_addr("10.10.1.2");
+	//addr.sin_addr.s_addr = ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
 	addr.sin_port = htons(PORT);
 	if (bind(sock,
 		 (struct sockaddr *)&addr,
@@ -460,7 +474,8 @@ int main(int argc, char **argv)
 	gettimeofday(&next, 0);
 	next.tv_sec = (next.tv_sec + 1) / 5 * 5;
 	next.tv_usec = 0;
-	while (1) {
+	if(op == 2)
+	{
 		struct timeval now;
 		struct timeval delta;
 		long delta_us;
@@ -500,15 +515,15 @@ int main(int argc, char **argv)
 					   siocgstamp,
 					   siocgstampns);
 			}
-		} else {
+		}
+	}
+	else 
+	{
 			/* write one packet */
 			sendpacket(sock,
 				   (struct sockaddr *)&addr,
 				   sizeof(addr));
 			next.tv_sec += 5;
-			continue;
-		}
 	}
-
 	return 0;
 }

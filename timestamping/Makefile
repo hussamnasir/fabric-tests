@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: GPL-2.0
 #CFLAGS += -I../../../../../usr/include
 CFLAGS += -I.
-CC=gcc 
+CC=gcc
+objects=simple_timestamping timestamping
 
 #TEST_GEN_FILES := hwtstamp_config rxtimestamp timestamping txtimestamp
 
@@ -11,8 +12,10 @@ CC=gcc
 #KSFT_KHDR_INSTALL := 1
 #include ../../lib.mk
 
-all: timestamping.o 
-	$(CC) -o timestamping timestamping.o
+$(objects): %: %.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+all: $(objects)
 
 clean: 
-	rm timestamping timestamping.o
+	$(RM) $(objects) *.o
