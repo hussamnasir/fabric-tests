@@ -357,7 +357,7 @@ int main(int argc, char **argv)
 			usage(argv[i]);
 	}
 
-	sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock < 0)
 		bail("socket");
 
