@@ -47,16 +47,11 @@
 # define PORT 10000
 #endif
 
-
-# define SEND 0
-# define RECEIVE 0
-
-
 static void usage(const char *error)
 {
 	if (error)
 		printf("invalid option: %s\n", error);
-		printf("<interface name> <send | recieve> <timestamping interface option*>\n\n"
+		printf("<interface name> <send | receive> <timestamping interface option*>\n\n"
 	       "Options:\n"
 	       "  IP_MULTICAST_LOOP - looping outgoing multicasts\n"
 	       "  SO_TIMESTAMP - normal software time stamping, ms resolution\n"
@@ -332,7 +327,7 @@ int main(int argc, char **argv)
 	else if (!strcasecmp(argv[2], "receive"))
 		op = 2;
 
-	if (!(op > 2 || op < 0 ))
+	if (op > 2 || op < 0 )
 		usage(0);
 
 	for (i = 3; i < argc; i++) {
