@@ -469,46 +469,49 @@ int main(int argc, char **argv)
 	gettimeofday(&next, 0);
 	next.tv_sec = (next.tv_sec + 1) / 5 * 5;
 	next.tv_usec = 0;
-	if(op == 2)
+	while(1)
 	{
-		struct timeval now;
-		struct timeval delta;
-		long delta_us;
-		int res;
-		fd_set readfs, errorfs;
+		if(op == 2)
+		{
+			struct timeval now;
+			struct timeval delta;
+			long delta_us;
+			int res;
+			fd_set readfs, errorfs;
 
-		gettimeofday(&now, 0);
-		delta_us = (long)(next.tv_sec - now.tv_sec) * 1000000 +
-			(long)(next.tv_usec - now.tv_usec);
-		if (delta_us > 0) {
-			/* continue waiting for timeout or data */
-			delta.tv_sec = delta_us / 1000000;
-			delta.tv_usec = delta_us % 1000000;
-
-			FD_ZERO(&readfs);
-			FD_ZERO(&errorfs);
-			FD_SET(sock, &readfs);
-			FD_SET(sock, &errorfs);
-			printf("%ld.%06ld: select %ldus\n",
-			       (long)now.tv_sec, (long)now.tv_usec,
-			       delta_us);
-			res = select(sock + 1, &readfs, 0, &errorfs, &delta);
 			gettimeofday(&now, 0);
-			printf("%ld.%06ld: select returned: %d, %s\n",
-			       (long)now.tv_sec, (long)now.tv_usec,
-			       res,
-			       res < 0 ? strerror(errno) : "success");
-			if (res > 0) {
-				if (FD_ISSET(sock, &readfs))
-					printf("ready for reading\n");
-				if (FD_ISSET(sock, &errorfs))
-					printf("has error\n");
-				recvpacket(sock, 0,
-					   siocgstamp,
-					   siocgstampns);
-				recvpacket(sock, MSG_ERRQUEUE,
-					   siocgstamp,
-					   siocgstampns);
+			delta_us = (long)(next.tv_sec - now.tv_sec) * 1000000 +
+				(long)(next.tv_usec - now.tv_usec);
+			if (delta_us > 0) {
+				/* continue waiting for timeout or data */
+				delta.tv_sec = delta_us / 1000000;
+				delta.tv_usec = delta_us % 1000000;
+
+				FD_ZERO(&readfs);
+				FD_ZERO(&errorfs);
+				FD_SET(sock, &readfs);
+				FD_SET(sock, &errorfs);
+				printf("%ld.%06ld: select %ldus\n",
+				       (long)now.tv_sec, (long)now.tv_usec,
+				       delta_us);
+				res = select(sock + 1, &readfs, 0, &errorfs, &delta);
+				gettimeofday(&now, 0);
+				printf("%ld.%06ld: select returned: %d, %s\n",
+				       (long)now.tv_sec, (long)now.tv_usec,
+				       res,
+				       res < 0 ? strerror(errno) : "success");
+				if (res > 0) {
+					if (FD_ISSET(sock, &readfs))
+						printf("ready for reading\n");
+					if (FD_ISSET(sock, &errorfs))
+						printf("has error\n");
+					recvpacket(sock, 0,
+						   siocgstamp,
+						   siocgstampns);
+					recvpacket(sock, MSG_ERRQUEUE,
+						   siocgstamp,
+						   siocgstampns);
+				}
 			}
 		}
 	}
