@@ -469,9 +469,9 @@ int main(int argc, char **argv)
 	gettimeofday(&next, 0);
 	next.tv_sec = (next.tv_sec + 1) / 5 * 5;
 	next.tv_usec = 0;
-	while(1)
+	if(op == 2)
 	{
-		if(op == 2)
+		while(1)
 		{
 			struct timeval now;
 			struct timeval delta;
