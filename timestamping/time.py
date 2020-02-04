@@ -13,7 +13,7 @@ if(sys.argv[1]=='send'):
     MESSAGE = "Hello, World!"
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-    s.connect(('10.33.128.130', 10000))
+    s.connect(('10.10.1.1', 10000))
     s.send(MESSAGE.encode())
     time.sleep(0.0001)
     #time.sleep(5)
@@ -27,7 +27,7 @@ else:
     server.setblocking(0)
 
     server.setsockopt(socket.SOL_SOCKET, SO_TIMESTAMPNS, 1)
-    server.bind(('10.33.128.130', 10000))
+    server.bind(('10.10.1.1', 10000))
     server.listen(5)
     inputs = [ server ]
     message_queues = {}
