@@ -2,7 +2,7 @@
 #CFLAGS += -I../../../../../usr/include
 CFLAGS += -I.
 CC=gcc
-objects=tcpserver
+objects=tcpserver tcpclient
 
 #all: $(TEST_PROGS)
 
