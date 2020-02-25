@@ -20,6 +20,7 @@
 #include <linux/errqueue.h>
 #include <linux/sockios.h>
 #include <linux/if_ether.h>
+#include <linux/if_packet.h>
 
 
 #ifndef SO_TIMESTAMPING
@@ -106,7 +107,18 @@ int main(int argc, char **argv)
 	strncpy(device.ifr_name, interface, sizeof(device.ifr_name));
 	if (ioctl(sock_raw, SIOCGIFADDR, &device) < 0)
 		bail("getting interface IP address");
-	setsockopt(sock_raw, SOL_SOCKET, SO_BINDTODEVICE, (void *)&device, sizeof(device));
+//	setsockopt(sock_raw, SOL_SOCKET, SO_BINDTODEVICE, (void *)&device, sizeof(device));
+
+	struct sockaddr_ll myaddr;
+	memset(&myaddr, 0, sizeof(struct sockaddr_ll));
+    myaddr.sll_family = AF_PACKET;
+    myaddr.sll_protocol = htons(ETH_P_ALL);
+    myaddr.sll_ifindex = if_nametoindex(interface);
+    if (bind(sock_raw, (struct sockaddr*) &myaddr, sizeof(myaddr)) < 0) {
+        perror("bind failed\n");
+        close(sock_raw);
+    }
+
 
 	memset(&hwtstamp, 0, sizeof(hwtstamp));
 	strncpy(hwtstamp.ifr_name, interface, sizeof(hwtstamp.ifr_name));
@@ -171,6 +183,12 @@ void ProcessPacket(unsigned char* buffer, int size)
 {
 	//Get the IP Header part of this packet
 	//struct iphdr *iph = (struct iphdr*)buffer;
+	struct ethhdr *eth = (struct ethhdr *)(buffer);
+	printf("\nEthernet Header\n");
+	printf("\t|-Source Address : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X\n",eth->h_source[0],eth->h_source[1],eth->h_source[2],eth->h_source[3],eth->h_source[4],eth->h_source[5]);
+	printf("\t|-Destination Address : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X\n",eth->h_dest[0],eth->h_dest[1],eth->h_dest[2],eth->h_dest[3],eth->h_dest[4],eth->h_dest[5]);
+	printf("\t|-Protocol : %d\n",eth->h_proto);
+
 	struct iphdr *iph = (struct iphdr*)(buffer + sizeof(struct ethhdr));
 
 	++total;
