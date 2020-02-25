@@ -74,6 +74,7 @@ int main()
 
 
 	interface = "enp0s31f6";
+	
 
 	so_timestamping_flags |= SOF_TIMESTAMPING_TX_HARDWARE;
 	//so_timestamping_flags |= SOF_TIMESTAMPING_TX_SOFTWARE;
@@ -97,11 +98,11 @@ int main()
 		return 1;
 	}
 
-
 	memset(&device, 0, sizeof(device));
 	strncpy(device.ifr_name, interface, sizeof(device.ifr_name));
 	if (ioctl(sock_raw, SIOCGIFADDR, &device) < 0)
 		bail("getting interface IP address");
+	setsockopt(sock_raw, SOL_SOCKET, SO_BINDTODEVICE, (void *)&device, sizeof(device));
 
 	memset(&hwtstamp, 0, sizeof(hwtstamp));
 	strncpy(hwtstamp.ifr_name, interface, sizeof(hwtstamp.ifr_name));
