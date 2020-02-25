@@ -19,6 +19,7 @@
 #include <linux/net_tstamp.h>
 #include <linux/errqueue.h>
 #include <linux/sockios.h>
+#include <linux/if_ether.h>
 
 
 #ifndef SO_TIMESTAMPING
@@ -94,7 +95,7 @@ int main(int argc, char **argv)
 	if(logfile==NULL) printf("Unable to create file.");
 	printf("Starting to sniff %s...\n",interface);
 	//Create a raw socket that shall sniff
-	sock_raw = socket(AF_INET , SOCK_RAW , IPPROTO_TCP);
+	sock_raw = socket(AF_PACKET , SOCK_RAW , htons(ETH_P_ALL));
 	if(sock_raw < 0)
 	{
 		printf("Socket Error\n");
@@ -169,7 +170,9 @@ int main(int argc, char **argv)
 void ProcessPacket(unsigned char* buffer, int size)
 {
 	//Get the IP Header part of this packet
-	struct iphdr *iph = (struct iphdr*)buffer;
+	//struct iphdr *iph = (struct iphdr*)buffer;
+	struct iphdr *iph = (struct iphdr*)(buffer + sizeof(struct ethhdr));
+
 	++total;
 	switch (iph->protocol) //Check the Protocol and do accordingly...
 	{
