@@ -163,8 +163,27 @@ int main(int argc, char **argv)
 	while(1)
 	{
 		saddr_size = sizeof saddr;
+			struct msghdr msg;
+	struct iovec entry;
+	struct sockaddr_in from_addr;
+	struct {
+		struct cmsghdr cm;
+		char control[512];
+	} control;
+	int res;
+
+	memset(&msg, 0, sizeof(msg));
+	msg.msg_iov = &entry;
+	msg.msg_iovlen = 1;
+	entry.iov_base = buffer;
+	entry.iov_len = 65536;
+	msg.msg_name = (caddr_t)&from_addr;
+	msg.msg_namelen = sizeof(from_addr);
+	msg.msg_control = &control;
+	msg.msg_controllen = sizeof(control);
 		//Receive a packet
-		data_size = recvfrom(sock_raw , buffer , 65536 , 0 , &saddr , &saddr_size);
+	data_size = recvmsg(sock_raw, &msg, 0);
+		//data_size = recvfrom(sock_raw , buffer , 65536 , 0 , &saddr , &saddr_size);
 		if(data_size <0 )
 		{
 			printf("Recvfrom error , failed to get packets\n");
@@ -172,6 +191,7 @@ int main(int argc, char **argv)
 		}
 		//Now process the packet
 		ProcessPacket(buffer , data_size);
+
 	}
 	close(sock_raw);
 	printf("Finished");
@@ -194,7 +214,7 @@ void ProcessPacket(unsigned char* buffer, int size)
 	{
 		case 1:  //ICMP Protocol
 			++icmp;
-			//PrintIcmpPacket(Buffer,Size);
+			print_icmp_packet(buffer,size);
 			break;
 		
 		case 2:  //IGMP Protocol
