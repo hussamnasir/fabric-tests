@@ -51,7 +51,7 @@ static void bail(const char *error)
 }
 
 
-int main()
+int main(int argc, char **argv)
 {
 	int saddr_size , data_size;
 	struct sockaddr saddr;
@@ -72,9 +72,12 @@ int main()
 	struct timeval next;
 	char *interface;
 
+	if (argc < 2) {
+		printf("Missing interface name\n");
+		exit(1);
+	}
+	interface = argv[1];
 
-	interface = "enp0s31f6";
-	
 
 	so_timestamping_flags |= SOF_TIMESTAMPING_TX_HARDWARE;
 	//so_timestamping_flags |= SOF_TIMESTAMPING_TX_SOFTWARE;
@@ -89,7 +92,7 @@ int main()
 	
 	logfile=fopen("/tmp/log.txt","w");
 	if(logfile==NULL) printf("Unable to create file.");
-	printf("Starting...\n");
+	printf("Starting to sniff %s...\n",interface);
 	//Create a raw socket that shall sniff
 	sock_raw = socket(AF_INET , SOCK_RAW , IPPROTO_TCP);
 	if(sock_raw < 0)
