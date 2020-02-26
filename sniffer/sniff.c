@@ -201,12 +201,6 @@ int main(int argc, char **argv)
 void ProcessPacket(unsigned char* buffer, int size)
 {
 	//Get the IP Header part of this packet
-	// struct ethhdr *eth = (struct ethhdr *)(buffer);
-	// printf("\nEthernet Header\n");
-	// printf("\t|-Source Address : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X\n",eth->h_source[0],eth->h_source[1],eth->h_source[2],eth->h_source[3],eth->h_source[4],eth->h_source[5]);
-	// printf("\t|-Destination Address : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X\n",eth->h_dest[0],eth->h_dest[1],eth->h_dest[2],eth->h_dest[3],eth->h_dest[4],eth->h_dest[5]);
-	// printf("\t|-Protocol : %d\n",eth->h_proto);
-
 	struct iphdr *iph = (struct iphdr*)(buffer + sizeof(struct ethhdr));
 
 	++total;
@@ -238,10 +232,21 @@ void ProcessPacket(unsigned char* buffer, int size)
 	printf("TCP : %d   UDP : %d   ICMP : %d   IGMP : %d   Others : %d   Total : %d\r",tcp,udp,icmp,igmp,others,total);
 }
 
+void print_eth_header(unsigned char* buffer, int size)
+{
+	struct ethhdr *eth = (struct ethhdr *)(buffer);
+	fprintf(logfile,"\n");
+	fprintf(logfile,"\nEthernet Header\n");
+	fprintf(logfile,"   |-Source Address : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X\n",eth->h_source[0],eth->h_source[1],eth->h_source[2],eth->h_source[3],eth->h_source[4],eth->h_source[5]);
+	fprintf(logfile,"   |-Destination Address : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X\n",eth->h_dest[0],eth->h_dest[1],eth->h_dest[2],eth->h_dest[3],eth->h_dest[4],eth->h_dest[5]);
+	fprintf(logfile,"   |-Protocol : %d\n",eth->h_proto);
+}
 void print_ip_header(unsigned char* Buffer, int Size)
 {
 	unsigned short iphdrlen;
-		
+	
+	print_eth_header(Buffer,Size);
+
 	struct iphdr *iph = (struct iphdr *)(Buffer + sizeof(struct ethhdr));
 	iphdrlen =iph->ihl*4;
 	
