@@ -242,7 +242,7 @@ void print_ip_header(unsigned char* Buffer, int Size)
 {
 	unsigned short iphdrlen;
 		
-	struct iphdr *iph = (struct iphdr *)Buffer;
+	struct iphdr *iph = (struct iphdr *)(Buffer + sizeof(struct ethhdr));
 	iphdrlen =iph->ihl*4;
 	
 	memset(&source, 0, sizeof(source));
@@ -272,10 +272,10 @@ void print_tcp_packet(unsigned char* Buffer, int Size)
 {
 	unsigned short iphdrlen;
 	
-	struct iphdr *iph = (struct iphdr *)Buffer;
+	struct iphdr *iph = (struct iphdr *)(Buffer + sizeof(struct ethhdr));
 	iphdrlen = iph->ihl*4;
 	
-	struct tcphdr *tcph=(struct tcphdr*)(Buffer + iphdrlen);
+	struct tcphdr *tcph=(struct tcphdr*)(Buffer + sizeof(struct ethhdr) + iphdrlen);
 			
 	fprintf(logfile,"\n\n***********************TCP Packet*************************\n");	
 		
@@ -320,10 +320,10 @@ void print_udp_packet(unsigned char *Buffer , int Size)
 	
 	unsigned short iphdrlen;
 	
-	struct iphdr *iph = (struct iphdr *)Buffer;
+	struct iphdr *iph = (struct iphdr *)(Buffer + sizeof(struct ethhdr));
 	iphdrlen = iph->ihl*4;
 	
-	struct udphdr *udph = (struct udphdr*)(Buffer + iphdrlen);
+	struct udphdr *udph = (struct udphdr*)(Buffer + sizeof(struct ethhdr) + iphdrlen);
 	
 	fprintf(logfile,"\n\n***********************UDP Packet*************************\n");
 	
@@ -352,10 +352,10 @@ void print_icmp_packet(unsigned char* Buffer , int Size)
 {
 	unsigned short iphdrlen;
 	
-	struct iphdr *iph = (struct iphdr *)Buffer;
+	struct iphdr *iph = (struct iphdr *)(Buffer+ sizeof(struct ethhdr));
 	iphdrlen = iph->ihl*4;
 	
-	struct icmphdr *icmph = (struct icmphdr *)(Buffer + iphdrlen);
+	struct icmphdr *icmph = (struct icmphdr *)(Buffer + sizeof(struct ethhdr) + iphdrlen);
 			
 	fprintf(logfile,"\n\n***********************ICMP Packet*************************\n");	
 	
